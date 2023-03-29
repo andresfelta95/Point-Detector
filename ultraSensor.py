@@ -90,18 +90,36 @@ class UltraManager:
     This class will manage a list of sensors and will return the distance of the closest object
 
     Attributes:
-        * sensors - list of sensors
-    
+        *   sensors - list of sensors
+        *   multi - multiplexer object  
     """
 
-    def __init__(self, sensors):
+    def __init__(self, sensors, multi):
         self._sensors = sensors
-        self._sleep = 0.1 #   Sleep time in s between readings
-        self._iterations = 30 #   Number of iterations to get the average distance
-        self._perFail = 0.66 #   Percentage of failed readings to consider the sensor as failed
+        self._multi = multi
+        self._distances = []
+        self._sleep = 0.1
+        self._iterations = 30
+        self._perFail = 0.66
+        self._timeOut = 50000
 
     #   Function to read all sensors and return a list of distances
     def read_distances(self):
         distances = []
-        for sensor in self._sensors:
-            #   
+        for i in range(len(self._sensors)):
+            self._multi.set_channel(i)
+            #   Create a loop, if the sensor gets the same reading 3 times in a row, append the distance to the list and break the loop
+            count = 0
+            while count < 3:
+                distance = self._sensors[i].read_distance()
+                if distance == self._distances[i]:
+                    count += 1
+                else:
+                    count = 0
+                self._distances[i] = distance
+            distances.append(distance)
+            #   Print the distance
+            print("Sensor: ", i, " Distance: ", distance)
+            #   Sleep for the specified time
+            time.sleep(self._sleep)
+        return distances

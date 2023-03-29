@@ -1,30 +1,40 @@
-# Author: Andres Tangarife
-# Date: 2023-03-02
-# Description: This is a demo to use 10 ultrasonic sensors to detect darts in a
-#              dartboard. The sensors are connected to a Multiplexer to reduce
-#              the number of pins used in the ESP32.
-#              The sensors are connected to the Multiplexer as follows:
-#              - Sensor 1: Channel 0
-#              - Sensor 2: Channel 1
-#              - Sensor 3: Channel 2
-#              - Sensor 4: Channel 3
-#              - Sensor 5: Channel 4
-#              - Sensor 6: Channel 5
-#              - Sensor 7: Channel 6
-#              - Sensor 8: Channel 7
-#              - Sensor 9: Channel 8
-#              - Sensor 10: Channel 9
-#              The ESP32 is connected to the Multiplexer as follows:
-#              - S0: Pin 18 (past 4) 
-#              - S1: Pin 5 
-#              - S2: Pin 17 (past 18)
-#              - S3: Pin 16 (past 19)
-#              - E: Pin 19 (past 23)
-#              The ESP32 is connected to the OLED display as follows:
-#              - SDA: Pin 21
-#              - SCL: Pin 22
-#              - VCC: 3.3V
-#              - GND: GND
+"""
+    Author: Andres Tangarife
+    Date: 2023-03-29
+    Description: This program will be used to play the dart game.
+            This program will have the following states:
+                - NoGame:       The game is not being played, Keep asking to the server for a new game
+                                This state will finish when the server sends a new game 
+                - ClearBoard:   Check until the reading of all the sensors is more than 35 cm
+
+                - GameDart1:    Gets the location of the first dart, and sends it to the server
+                                After 20 if the dart is not in the board sends false to the server
+                - GameDart2:    Gets the location of the second dart, and sends it to the server
+                                After 20 if the dart is not in the board sends false to the server
+                - GameDart3:    Gets the location of the third dart, and sends it to the server
+                                After 20 if the dart is not in the board sends false to the server
+
+                - NextTurn:     Will ask the server for if a new turn is available, if it is, then it will
+                                move to the ClearBoard state, if not, then it will move to the NoGame state
+
+
+            The sensors are connected to the Multiplexer as follows:
+               - Sensor 1: Channel 0
+               - Sensor 2: Channel 1
+               - Sensor 3: Channel 2
+               - Sensor 4: Channel 3
+               - Sensor 5: Channel 4
+               - Sensor 6: Channel 5
+               - Sensor 7: Channel 6
+               - Sensor 8: Channel 7
+               - Sensor 9: Channel 8
+               - Sensor 10: Channel 9
+            The ESP32 is connected to the Multiplexer as follows:
+               - S0: Pin 18 (past 4) 
+               - S1: Pin 5 
+               - S2: Pin 17 (past 18)
+               - S3: Pin 16 (past 19)
+               - E: Pin 19 (past 23)
 #              The echo pin of the sensors is connected to the ESP32 as follows:
 #              - Sensor 1: Pin 13 (past 32)
 #              - Sensor 2: Pin 12 (past 33)
@@ -38,6 +48,8 @@
 #              - Sensor 10: Pin 34
 #              The trigger pin for the multiplexer is connected to the ESP32 as follows:
 #              - Pin 4 (past 15)
+"""
+
 # Import the libraries
 # from ssd1306 import SSD1306_I2C
 from machine import Pin, time_pulse_us
