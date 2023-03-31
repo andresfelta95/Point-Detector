@@ -36,7 +36,7 @@ class UltraSensor:
         self.distance = 0.0
         self._timeOut = 50000 #   Timeout in us for the echo pulse
         self._sleep = 0.1 #   Sleep time in s between readings
-        self._iterations = 30 #   Number of iterations to get the average distance
+        self._iterations = 100 #   Number of iterations to get the average distance
         self._perFail = 0.66 #   Percentage of failed readings to consider the sensor as failed
 
 
@@ -58,17 +58,17 @@ class UltraSensor:
                 #   cm = duration * speed of sound(cm/s) / 2 (round trip) / 10000 (us to s)
                 #distances.append(Sound_SPEED * ultrason_duration /2.0 / 1000000)
                 distances.append(ultrason_duration) #   In us
-            time.sleep_ms(10)
+            time.sleep_us(50)
         #   Remove the outliers
-        while len(distances) >= 7:
+        while len(distances) >= 90:
             #   Remove the lowest and highest values
             distances.remove(min(distances))
             distances.remove(max(distances))
-        print(distances)
+        # print(distances)
         cm = sum(distances) / len(distances)
         cm = self.convert_Distance(cm)
         #   Return the average distance
-        return round(cm, 2)
+        return round(cm, 4)
     
     def convert_Distance(self, distance):
         # actualDistance = 0.0161 * distance + 1.6172 # sensor 0
@@ -108,18 +108,10 @@ class UltraManager:
         distances = []
         for i in range(len(self._sensors)):
             self._multi.set_channel(i)
-            #   Create a loop, if the sensor gets the same reading 3 times in a row, append the distance to the list and break the loop
-            count = 0
-            while count < 3:
-                distance = self._sensors[i].read_distance()
-                if distance == self._distances[i]:
-                    count += 1
-                else:
-                    count = 0
-                self._distances[i] = distance
+            distance = self._sensors[i].read_distance()
             distances.append(distance)
             #   Print the distance
             print("Sensor: ", i, " Distance: ", distance)
             #   Sleep for the specified time
-            time.sleep(self._sleep)
+            # time.sleep(self._sleep)
         return distances
