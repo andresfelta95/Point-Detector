@@ -58,7 +58,7 @@ class UltraSensor:
                 #   cm = duration * speed of sound(cm/s) / 2 (round trip) / 10000 (us to s)
                 #distances.append(Sound_SPEED * ultrason_duration /2.0 / 1000000)
                 distances.append(ultrason_duration) #   In us
-            time.sleep_us(50)
+            #time.sleep_us(50)
         #   Remove the outliers
         while len(distances) >= 90:
             #   Remove the lowest and highest values
@@ -66,7 +66,7 @@ class UltraSensor:
             distances.remove(max(distances))
         # print(distances)
         cm = sum(distances) / len(distances)
-        cm = self.convert_Distance(cm)
+        cm = (cm * 343 / 20000) + 1.5
         #   Return the average distance
         return round(cm, 4)
     
@@ -114,4 +114,102 @@ class UltraManager:
             print("Sensor: ", i, " Distance: ", distance)
             #   Sleep for the specified time
             # time.sleep(self._sleep)
+            self._distances = distances
         return distances
+    
+    #   Function to get the 2 adjacent sensors to the closest object
+    def get_adjacent_sensors(self):
+        #   Get the index of the sensor with the smallest distance
+        index = self._distances.index(min(self._distances))
+        #   Check one sensor to the left and one to the right and pick the one with the smallest distance
+        if index == 0:
+            #   If the index is 0, then the sensor to the left is the last sensor
+            left = len(self._distances) - 1
+            right = index + 1
+        elif index == len(self._distances) - 1:
+            #   If the index is the last sensor, then the sensor to the right is the first sensor
+            left = index - 1
+            right = 0
+        else:
+            left = index - 1
+            right = index + 1
+        #   Check if right and left distances are more than 30 cm
+        if self._distances[left] > 30 and self._distances[right] > 30:
+            #   If both are more than 30 cm, then return the same sensor
+            return index, index
+        else:
+            #   Check which sensor has the smallest distance
+            if self._distances[left] < self._distances[right]:
+                return left, index
+            else:
+                return index, right
+        
+    #   Function to get the location of the closest object
+    def get_location(self):
+        #   Get the 2 adjacent sensors to the closest object
+        left, right = self.get_adjacent_sensors()
+        #   Check if the 2 sensors are the same
+        if left == right:
+            #   Get the x and y coordinates from the sensor
+            x1, y1 = self._sensors[left]._location
+            #   Get the distance from the sensor
+            r1 = self._distances[left]
+            #   Calculate the distance from the center (0, 0) and the sensor
+            d = math.sqrt(x1**2 + y1**2)
+            #   Get second radius
+            r2 = d - r1
+            # Calculate the intersection points of the two circles
+            a = (r1**2 - r2**2 + d**2) / (2*d)
+            h = 0
+            x3 = x1 + a*(0 - x1)/d
+            y3 = y1 + a*(0 - y1)/d
+            #   Circle Intersections
+            rX1 = x3 + h*(0 - y1)/d
+            rY1 = y3 - h*(0 - x1)/d
+            rX2 = x3 - h*(0 - y1)/d
+            rY2 = y3 + h*(0 - x1)/d
+            #   Check which point is inside the board and return it
+            if self.is_inside_board(rX1, rY1):
+                return (rX1, rY1)
+            else:
+                return (rX2, rY2)
+        #   Get the x and y coordinates from the sensors
+        x1, y1 = self._sensors[left]._location
+        x2, y2 = self._sensors[right]._location
+        #   Get the distance from the sensors
+        r1 = self._distances[left]
+        r2 = self._distances[right]
+        # Calculate the distance between the centers of the two circles
+        d = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+        
+
+        # Check if the two circles overlap or are disjoint
+        if d > r1 + r2:
+            return "The circles are disjoint"
+        elif d < abs(r1 - r2):
+            return "One circle is inside the other"
+
+        # Calculate the intersection points of the two circles
+        a = (r1**2 - r2**2 + d**2) / (2*d)
+        h = math.sqrt(r1**2 - a**2)
+        x3 = x1 + a*(x2 - x1)/d
+        y3 = y1 + a*(y2 - y1)/d
+        #   Circle Intersections
+        rX1 = x3 + h*(y2 - y1)/d
+        rY1 = y3 - h*(x2 - x1)/d
+        rX2 = x3 - h*(y2 - y1)/d
+        rY2 = y3 + h*(x2 - x1)/d
+
+        #   Check which point is inside the board and return it
+        if self.is_inside_board(rX1, rY1):
+            return (rX1, rY1)
+        else:
+            return (rX2, rY2)
+        
+    #   Function to check if a point is inside the board
+    def is_inside_board(self, x, y):
+        #   Check if the point is inside the board
+        if x >= -20 and x <= 20 and y >= -20 and y <= 20:
+            return True
+        else:
+            return False

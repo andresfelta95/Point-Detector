@@ -66,15 +66,15 @@ mux = Mux(18, 5, 17, 16, 19)
 # trig = Pin(4, Pin.OUT) #was pin 15 
 
 # Create the sensors objects
-sensor0 = UltraSensor(13, 0, 19.8, 0.0161, 1.6172) # Pin 13 , location (0,19.8)
-sensor1 = UltraSensor(12, 11.4, 16.2, 0.0158, 1.7105) # Pin 12 , location (11.4,16.2)
-sensor2 = UltraSensor(14, 18.8, 6, 0.016, 1.9421) # Pin 14 , location (18.8,6)
+sensor0 = UltraSensor(13, 0, 19.5, 0.0161, 1.6172) # Pin 13 , location (0,19.8)
+sensor1 = UltraSensor(12, 11.5, 16.1, 0.0158, 1.7105) # Pin 12 , location (11.4,16.2)
+sensor2 = UltraSensor(14, 18.6, 6, 0.016, 1.9421) # Pin 14 , location (18.8,6)
 sensor3 = UltraSensor(27, 18.8, -6, 0.0158, 2.1619) # Pin 27 , location (18.8,-6)
-sensor4 = UltraSensor(26, 11.4, -16.2, 0.0153, 2.294) # Pin 26 , location (11.4,-16.2)
+sensor4 = UltraSensor(26, 11.5, -16.1, 0.0153, 2.294) # Pin 26 , location (11.4,-16.2)
 sensor5 = UltraSensor(25, 0, -19.8, 0.0158, 1.1089) # Pin 25 , location (0,-19.8)
-sensor6 = UltraSensor(33, -11.4, -16.2, 0.0164, 1.1967) # Pin 33 , location (-11.4,-16.2)
-sensor7 = UltraSensor(32, -18.8, -6, 0.0152, 1.8608) # Pin 32 , location (-18.8,-6)
-sensor8 = UltraSensor(35, -18.8, 6, 0.0154, 1.9196) # Pin 35 , location (-18.8,6)
+sensor6 = UltraSensor(33, -11.8, -16.1, 0.0164, 1.1967) # Pin 33 , location (-11.4,-16.2)
+sensor7 = UltraSensor(32, -18.7, -6, 0.0152, 1.8608) # Pin 32 , location (-18.8,-6)
+sensor8 = UltraSensor(35, -18.6, 6.4, 0.0154, 1.9196) # Pin 35 , location (-18.8,6)
 sensor9 = UltraSensor(34, -11.4, 16.2, 0.0158, 1.7896) # Pin 34 , location (-11.4,16.2)
 
 # Create the list of sensors
@@ -134,14 +134,17 @@ distances = []
 location = (0,0)
 
 # Create the variable for the game
-game = False
+game = True
+
+#   Create a timer
+timer = time.ticks_ms()
 
 #   Create the function to clear the board
 def ClearBoard():
     distances = sensor_manager.read_distances()
     #   If all the distances are more than 35 cm, then move to the GameDart1 state
     for distance in distances:
-        if distance < 35:
+        if distance > 30:
             return
     state = State.GameDart1
 
@@ -149,9 +152,26 @@ def ClearBoard():
 def GameDart1():
     #   Cheack if there is a game
     if game == False:
+        state = State.NoGame
         return
-    #   Read the distances until a dart is detected
+    #   Set the timer
+    timer = time.ticks_ms()
+    #   Read the distances until a dart is detected or 10 seconds have passed
+    while time.ticks_diff(time.ticks_ms(), timer) < 10000:
+        distances = sensor_manager.read_distances()
+        #   If a dart is detected, then move to the GameDart2 state
+        for distance in distances:
+            if distance < 30:
+                distances = sensor_manager.read_distances()
+                dart1_location = sensor_manager.get_location()
+                print("Dart 1 Location: " + str(dart1_location))
+                #   If a dart is detected, then move to the GameDart2 state
+                state = State.GameDart2
+                return
+
     
+    
+
 
 
     
@@ -160,35 +180,37 @@ while True:
     # distances = sensor_manager.read_distances()
     # print(distances)
     # time.sleep(1)
-    if state == State.NoGame:
-        print("No Game")
-        if game == False:
-            print("No Game")
-            #   Ask the server if there is a game
-            #   If there is a game, then move to the ClearBoard state
-            #   If there is no game, then stay in the NoGame state
-        else:
-            print("Game")
-            #   Ask the server if there is a turn
-            #   If there is a turn, then move to the ClearBoard state
-            #   If there is no turn, then stay in the NoGame state
-    elif state == State.ClearBoard:
-        print("Clear Board")
+    GameDart1()
+    time.sleep(0.5)
+    # if state == State.NoGame:
+    #     print("No Game")
+    #     if game == False:
+    #         print("No Game")
+    #         #   Ask the server if there is a game
+    #         #   If there is a game, then move to the ClearBoard state
+    #         #   If there is no game, then stay in the NoGame state
+    #     else:
+    #         print("Game")
+    #         #   Ask the server if there is a turn
+    #         #   If there is a turn, then move to the ClearBoard state
+    #         #   If there is no turn, then stay in the NoGame state
+    # elif state == State.ClearBoard:
+    #     print("Clear Board")
         #   Clear the board
         #   Move to the GameDart1 state
-    elif state == State.GameDart1:
+    # elif state == State.GameDart1:
         #   Detect the first dart
         #   If the first dart is detected, then move to the GameDart2 state
         #   If the first dart is not detected, then stay in the GameDart1 state
-    elif state == State.GameDart2:
+    # elif state == State.GameDart2:
         #   Detect the second dart
         #   If the second dart is detected, then move to the GameDart3 state
         #   If the second dart is not detected, then stay in the GameDart2 state
-    elif state == State.GameDart3:
+    # elif state == State.GameDart3:
         #   Detect the third dart
         #   If the third dart is detected, then move to the NextTurn state
         #   If the third dart is not detected, then stay in the GameDart3 state
-    elif state == State.NextTurn:
+    # elif state == State.NextTurn:
         #   Ask the server if there is a turn
         #   If there is a turn, then move to the ClearBoard state
         #   If there is no turn, then move to the NoGame state
