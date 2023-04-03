@@ -92,15 +92,6 @@ class State:
     GameDart3 = 4
     NextTurn = 5
 
-# Create an enum for the states
-class State:
-    NoGame = 0
-    ClearBoard = 1
-    GameDart1 = 2
-    GameDart2 = 3
-    GameDart3 = 4
-    NextTurn = 5
-
 # Create the variables for the states
 state = State.NoGame
 previous_state = State.NoGame
@@ -136,15 +127,73 @@ server_port = 0
 #         pass
 # print('network config:', sta_if.ifconfig())
 
+# Create the variable for the distances
 distances = []
 
+# Create the variable for the location
+location = (0,0)
+
+# Create the variable for the game
+game = False
+
+#   Create the function to clear the board
+def ClearBoard():
+    distances = sensor_manager.read_distances()
+    #   If all the distances are more than 35 cm, then move to the GameDart1 state
+    for distance in distances:
+        if distance < 35:
+            return
+    state = State.GameDart1
+
+#   Create the function to detect the first dart
+def GameDart1():
+    #   Cheack if there is a game
+    if game == False:
+        return
+    #   Read the distances until a dart is detected
+    
 
 
     
 
 while True:
-    distances = sensor_manager.read_distances()
-    print(distances)
-    time.sleep(1)
+    # distances = sensor_manager.read_distances()
+    # print(distances)
+    # time.sleep(1)
+    if state == State.NoGame:
+        print("No Game")
+        if game == False:
+            print("No Game")
+            #   Ask the server if there is a game
+            #   If there is a game, then move to the ClearBoard state
+            #   If there is no game, then stay in the NoGame state
+        else:
+            print("Game")
+            #   Ask the server if there is a turn
+            #   If there is a turn, then move to the ClearBoard state
+            #   If there is no turn, then stay in the NoGame state
+    elif state == State.ClearBoard:
+        print("Clear Board")
+        #   Clear the board
+        #   Move to the GameDart1 state
+    elif state == State.GameDart1:
+        #   Detect the first dart
+        #   If the first dart is detected, then move to the GameDart2 state
+        #   If the first dart is not detected, then stay in the GameDart1 state
+    elif state == State.GameDart2:
+        #   Detect the second dart
+        #   If the second dart is detected, then move to the GameDart3 state
+        #   If the second dart is not detected, then stay in the GameDart2 state
+    elif state == State.GameDart3:
+        #   Detect the third dart
+        #   If the third dart is detected, then move to the NextTurn state
+        #   If the third dart is not detected, then stay in the GameDart3 state
+    elif state == State.NextTurn:
+        #   Ask the server if there is a turn
+        #   If there is a turn, then move to the ClearBoard state
+        #   If there is no turn, then move to the NoGame state
+        
+
+
 
 
