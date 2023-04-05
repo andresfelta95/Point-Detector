@@ -68,7 +68,7 @@ mux = Mux(18, 5, 17, 16, 19)
 # Create the sensors objects
 sensor0 = UltraSensor(13, 0, 19.8, 0.0161, 1.6172) # Pin 13 , location (0,19.8)
 sensor1 = UltraSensor(12, 11.8, 15.2, 0.0158, 1.7105) # Pin 12 , location (11.4,16.2)
-sensor2 = UltraSensor(14, 18.6, 6, 0.016, 1.9421) # Pin 14 , location (18.8,6)
+sensor2 = UltraSensor(14, 18.9, 6, 0.016, 1.9421) # Pin 14 , location (18.8,6)
 sensor3 = UltraSensor(27, 18.1, -6, 0.0158, 2.1619) # Pin 27 , location (18.8,-6)
 sensor4 = UltraSensor(26, 10.7, -15.4, 0.0153, 2.294) # Pin 26 , location (11.4,-16.2)
 sensor5 = UltraSensor(25, 0, -19.7, 0.0158, 1.1089) # Pin 25 , location (0,-19.8)
@@ -113,22 +113,24 @@ server_ip = ""
 server_port = 0
 
 # # Create the variables for the WiFi
-wifi = False
-wifi_ssid = "Mi 10T Pro"
-wifi_password = "teamovida"
+# wifi = False
+# wifi_ssid = "Mi 10T Pro"
+# wifi_password = "teamovida"
 
 #   Connect to the WiFi
-sta_if = network.WLAN(network.STA_IF)
-if not sta_if.isconnected():
-    print('connecting to network...')
-    sta_if.active(True)
-    sta_if.connect(wifi_ssid, wifi_password)
-    while not sta_if.isconnected():
-        pass
-print('network config:', sta_if.ifconfig())
+# sta_if = network.WLAN(network.STA_IF)
+# if not sta_if.isconnected():
+#     print('connecting to network...')
+#     sta_if.active(True)
+#     sta_if.connect(wifi_ssid, wifi_password)
+#     while not sta_if.isconnected():
+#         pass
+# print('network config:', sta_if.ifconfig())
 
 # Create the variable for the distances
 distances = []
+d1Distances = []
+d2Distances = []
 
 # Create the variable for the location
 location = (0,0)
@@ -144,7 +146,7 @@ def ClearBoard():
     distances = sensor_manager.read_distances()
     #   If all the distances are more than 35 cm, then move to the GameDart1 state
     for distance in distances:
-        if distance > 30:
+        if distance < 30:
             return
     state = State.GameDart1
 
@@ -159,15 +161,48 @@ def GameDart1():
     #   Read the distances until a dart is detected or 10 seconds have passed
     while time.ticks_diff(time.ticks_ms(), timer) < 10000:
         distances = sensor_manager.read_distances()
+        bullseye = 0
+        for distance in distances:
+            if distance > 18 and distance < 22:
+                bullseye = bullseye + 1
+            else:
+                bullseye = 0
+        if bullseye == 10:
+            dart1_location = (0,0)
+            print("Dart 1 Location: " + str(dart1_location))
+            d1Distances = distances
+            state = State.GameDart2
+            return 
         #   If a dart is detected, then move to the GameDart2 state
         for distance in distances:
             if distance < 30:
                 distances = sensor_manager.read_distances()
                 dart1_location = sensor_manager.get_location()
                 print("Dart 1 Location: " + str(dart1_location))
+                d1Distances = distances
                 #   If a dart is detected, then move to the GameDart2 state
                 state = State.GameDart2
                 return
+    #   If 10 seconds have passed, then move to the GameDart2 state
+    dart1_location = (None,None)
+    print("Dart 1 Location: " + str(dart1_location))
+    d1Distances = distances
+    state = State.NoGame
+
+#   Create the function to detect the second dart
+def GameDart2():
+    #   Cheack if there is a game
+    if game == False:
+        state = State.NoGame
+        return
+    #   Set the timer
+    timer = time.ticks_ms()
+    #   Read the distances until a dart is detected or 10 seconds have passed
+    while time.ticks_diff(time.ticks_ms(), timer) < 10000:
+        distances = sensor_manager.read_distances()
+        #   Check if the distances are the same as the first dart
+        if distances == d1Distances:
+            continue
 
     
     
@@ -181,7 +216,7 @@ while True:
     # print(distances)
     # time.sleep(1)
     GameDart1()
-    time.sleep(0.5)
+    time.sleep(1)
     # if state == State.NoGame:
     #     print("No Game")
     #     if game == False:

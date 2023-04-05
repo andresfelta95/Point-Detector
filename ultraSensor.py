@@ -66,23 +66,23 @@ class UltraSensor:
             distances.remove(max(distances))
         # print(distances)
         cm = sum(distances) / len(distances)
-        cm = (cm * 343 / 20000) + 1.7
+        cm = (cm * 340 / 20000) + 1.7
         #   Return the average distance
         return round(cm, 4)
     
-    def convert_Distance(self, distance):
-        # actualDistance = 0.0161 * distance + 1.6172 # sensor 0
-        # actualDistance = 0.0158 * distance + 1.7105 # sensor 1
-        # actualDistance = 0.016 * distance + 1.9421 # sensor 2
-        # actualDistance = 0.0158 * distance + 2.1619 # sensor 3
-        # actualDistance = 0.0153 * distance + 2.294 # sensor 4
-        # actualDistance = 0.0158 * distance + 1.1089 # sensor 5
-        # actualDistance = 0.0164 * distance + 1.1967 # sensor 6
-        # actualDistance = 0.0152 * distance + 1.8608 # sensor 7
-        # actualDistance = 0.0154 * distance + 1.9196 # sensor 8
-        # actualDistance = 0.0157 * distance + 1.7885 # sensor 9
-        actualDistance = self._Mval * distance + self._Bval
-        return actualDistance
+    # def convert_Distance(self, distance):
+    #     # actualDistance = 0.0161 * distance + 1.6172 # sensor 0
+    #     # actualDistance = 0.0158 * distance + 1.7105 # sensor 1
+    #     # actualDistance = 0.016 * distance + 1.9421 # sensor 2
+    #     # actualDistance = 0.0158 * distance + 2.1619 # sensor 3
+    #     # actualDistance = 0.0153 * distance + 2.294 # sensor 4
+    #     # actualDistance = 0.0158 * distance + 1.1089 # sensor 5
+    #     # actualDistance = 0.0164 * distance + 1.1967 # sensor 6
+    #     # actualDistance = 0.0152 * distance + 1.8608 # sensor 7
+    #     # actualDistance = 0.0154 * distance + 1.9196 # sensor 8
+    #     # actualDistance = 0.0157 * distance + 1.7885 # sensor 9
+    #     actualDistance = self._Mval * distance + self._Bval
+    #     return actualDistance
     
 #   Manager Class for the sensors
 class UltraManager:
@@ -113,7 +113,7 @@ class UltraManager:
             #   Print the distance
             print("Sensor: ", i, " Distance: ", distance)
             #   Sleep for the specified time
-            # time.sleep(self._sleep)
+            # time.sleep_us(50)
             self._distances = distances
         return distances
     
