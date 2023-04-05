@@ -66,16 +66,16 @@ mux = Mux(18, 5, 17, 16, 19)
 # trig = Pin(4, Pin.OUT) #was pin 15 
 
 # Create the sensors objects
-sensor0 = UltraSensor(13, 0, 19.5, 0.0161, 1.6172) # Pin 13 , location (0,19.8)
-sensor1 = UltraSensor(12, 11.5, 16.1, 0.0158, 1.7105) # Pin 12 , location (11.4,16.2)
+sensor0 = UltraSensor(13, 0, 19.8, 0.0161, 1.6172) # Pin 13 , location (0,19.8)
+sensor1 = UltraSensor(12, 11.8, 15.2, 0.0158, 1.7105) # Pin 12 , location (11.4,16.2)
 sensor2 = UltraSensor(14, 18.6, 6, 0.016, 1.9421) # Pin 14 , location (18.8,6)
-sensor3 = UltraSensor(27, 18.8, -6, 0.0158, 2.1619) # Pin 27 , location (18.8,-6)
-sensor4 = UltraSensor(26, 11.5, -16.1, 0.0153, 2.294) # Pin 26 , location (11.4,-16.2)
-sensor5 = UltraSensor(25, 0, -19.8, 0.0158, 1.1089) # Pin 25 , location (0,-19.8)
-sensor6 = UltraSensor(33, -11.8, -16.1, 0.0164, 1.1967) # Pin 33 , location (-11.4,-16.2)
-sensor7 = UltraSensor(32, -18.7, -6, 0.0152, 1.8608) # Pin 32 , location (-18.8,-6)
-sensor8 = UltraSensor(35, -18.6, 6.4, 0.0154, 1.9196) # Pin 35 , location (-18.8,6)
-sensor9 = UltraSensor(34, -11.4, 16.2, 0.0158, 1.7896) # Pin 34 , location (-11.4,16.2)
+sensor3 = UltraSensor(27, 18.1, -6, 0.0158, 2.1619) # Pin 27 , location (18.8,-6)
+sensor4 = UltraSensor(26, 10.7, -15.4, 0.0153, 2.294) # Pin 26 , location (11.4,-16.2)
+sensor5 = UltraSensor(25, 0, -19.7, 0.0158, 1.1089) # Pin 25 , location (0,-19.8)
+sensor6 = UltraSensor(33, -12, -16.2, 0.0164, 1.1967) # Pin 33 , location (-11.4,-16.2)
+sensor7 = UltraSensor(32, -18.6, -5.3, 0.0152, 1.8608) # Pin 32 , location (-18.8,-6)
+sensor8 = UltraSensor(35, -18.6, 6.8, 0.0154, 1.9196) # Pin 35 , location (-18.8,6)
+sensor9 = UltraSensor(34, -11.7, 17, 0.0158, 1.7896) # Pin 34 , location (-11.4,16.2)
 
 # Create the list of sensors
 sensors = [sensor0, sensor1, sensor2, sensor3, sensor4, sensor5, sensor6, sensor7, sensor8, sensor9]
@@ -113,19 +113,19 @@ server_ip = ""
 server_port = 0
 
 # # Create the variables for the WiFi
-# wifi = False
-# wifi_ssid = "Mi 10T Pro"
-# wifi_password = "teamovida"
+wifi = False
+wifi_ssid = "Mi 10T Pro"
+wifi_password = "teamovida"
 
-# #   Connect to the WiFi
-# sta_if = network.WLAN(network.STA_IF)
-# if not sta_if.isconnected():
-#     print('connecting to network...')
-#     sta_if.active(True)
-#     sta_if.connect(wifi_ssid, wifi_password)
-#     while not sta_if.isconnected():
-#         pass
-# print('network config:', sta_if.ifconfig())
+#   Connect to the WiFi
+sta_if = network.WLAN(network.STA_IF)
+if not sta_if.isconnected():
+    print('connecting to network...')
+    sta_if.active(True)
+    sta_if.connect(wifi_ssid, wifi_password)
+    while not sta_if.isconnected():
+        pass
+print('network config:', sta_if.ifconfig())
 
 # Create the variable for the distances
 distances = []

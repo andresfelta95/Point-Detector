@@ -66,7 +66,7 @@ class UltraSensor:
             distances.remove(max(distances))
         # print(distances)
         cm = sum(distances) / len(distances)
-        cm = (cm * 343 / 20000) + 1.5
+        cm = (cm * 343 / 20000) + 1.7
         #   Return the average distance
         return round(cm, 4)
     
