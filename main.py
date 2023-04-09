@@ -127,7 +127,7 @@ server_port = 0
 #         pass
 # print('network config:', sta_if.ifconfig())
 
-# Create the variable for the distances
+# Create list of distances, d1Distances, d2Distances
 distances = []
 d1Distances = []
 d2Distances = []
@@ -147,15 +147,14 @@ def ClearBoard():
     #   If all the distances are more than 35 cm, then move to the GameDart1 state
     for distance in distances:
         if distance < 30:
-            return
-    state = State.GameDart1
+            return State.ClearBoard
+    return State.GameDart1
 
 #   Create the function to detect the first dart
 def GameDart1():
     #   Cheack if there is a game
     if game == False:
-        state = State.NoGame
-        return
+        return State.NoGame
     #   Set the timer
     timer = time.ticks_ms()
     #   Read the distances until a dart is detected or 10 seconds have passed
@@ -170,9 +169,8 @@ def GameDart1():
         if bullseye == 10:
             dart1_location = (0,0)
             print("Dart 1 Location: " + str(dart1_location))
-            d1Distances = distances
-            state = State.GameDart2
-            return 
+            d1Distances.extend(distances)
+            return State.GameDart2
         #   If a dart is detected, then move to the GameDart2 state
         for distance in distances:
             if distance < 30:
@@ -181,27 +179,25 @@ def GameDart1():
                 print("Dart 1 Location: " + str(dart1_location))
                 d1Distances = distances
                 #   If a dart is detected, then move to the GameDart2 state
-                state = State.GameDart2
-                return
+                return State.GameDart2
     #   If 10 seconds have passed, then move to the GameDart2 state
     dart1_location = (None,None)
     print("Dart 1 Location: " + str(dart1_location))
     d1Distances = distances
-    state = State.NoGame
+    return State.GameDart2
 
 #   Create the function to detect the second dart
 def GameDart2():
     #   Cheack if there is a game
     if game == False:
-        state = State.NoGame
-        return
+        return State.NoGame
     #   Set the timer
     timer = time.ticks_ms()
     #   Read the distances until a dart is detected or 10 seconds have passed
     while time.ticks_diff(time.ticks_ms(), timer) < 10000:
         distances = sensor_manager.read_distances()
         #   Check if the distances are the same as the first dart
-        if (UltraManager.check_same(d1Distances, distances)):
+        if (sensor_manager.check_same(d1Distances, distances)):
             continue
         #   Get the location of the second dart
         dart2_location = sensor_manager.get_dart_location(d1Distances, distances)
@@ -209,29 +205,27 @@ def GameDart2():
         if dart2_location == (None,None):
             continue
         else:
-            d2Distances = distances
-            state = State.GameDart3
-            return
+            d2Distances.extend(distances)
+            return State.GameDart3
         
     #   If 10 seconds have passed, then move to the GameDart3 state
     dart2_location = (None,None)
     print("Dart 2 Location: " + str(dart2_location))
     d2Distances = distances
-    state = State.GameDart3
+    return State.GameDart3
 
 #   Create the function to detect the third dart
 def GameDart3():
     #   Cheack if there is a game
     if game == False:
-        state = State.NoGame
-        return
+        return State.NoGame
     #   Set the timer
     timer = time.ticks_ms()
     #   Read the distances until a dart is detected or 10 seconds have passed
     while time.ticks_diff(time.ticks_ms(), timer) < 10000:
         distances = sensor_manager.read_distances()
         #   Check if the distances are the same as the second dart
-        if (UltraManager.check_same(d2Distances, distances)):
+        if (sensor_manager.check_same(d2Distances, distances)):
             continue
         #   Get the location of the third dart
         dart3_location = sensor_manager.get_dart_location(d2Distances, distances)
@@ -239,13 +233,12 @@ def GameDart3():
         if dart3_location == (None,None):
             continue
         else:
-            state = State.NextTurn
-            return
+            return State.NextTurn
         
     #   If 10 seconds have passed, then move to the NextTurn state
     dart3_location = (None,None)
     print("Dart 3 Location: " + str(dart3_location))
-    state = State.NextTurn
+    return State.NextTurn
 
     
     
@@ -258,7 +251,7 @@ while True:
     # distances = sensor_manager.read_distances()
     # print(distances)
     # time.sleep(1)
-    time.sleep(1)
+    # time.sleep(1)
     if state == State.NoGame:
         print("No Game")
         if game == False:
@@ -277,19 +270,19 @@ while True:
         #   Move to the GameDart1 state
     elif state == State.GameDart1:
         print("Game Dart 1")
-        GameDart1()
+        state = GameDart1()
         #   Detect the first dart
         #   If the first dart is detected, then move to the GameDart2 state
         #   If the first dart is not detected, then stay in the GameDart1 state
     elif state == State.GameDart2:
         print("Game Dart 2")
-        GameDart2()
+        state = GameDart2()
         #   Detect the second dart
         #   If the second dart is detected, then move to the GameDart3 state
         #   If the second dart is not detected, then stay in the GameDart2 state
     elif state == State.GameDart3:
         print("Game Dart 3")
-        GameDart3()
+        state = GameDart3()
         #   Detect the third dart
         #   If the third dart is detected, then move to the NextTurn state
         #   If the third dart is not detected, then stay in the GameDart3 state
