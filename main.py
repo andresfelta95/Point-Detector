@@ -201,8 +201,9 @@ def GameDart2():
     while time.ticks_diff(time.ticks_ms(), timer) < 10000:
         distances = sensor_manager.read_distances()
         #   Check if the distances are the same as the first dart
-        if distances == d1Distances:
+        if (UltraManager.check_same(d1Distances, distances)):
             continue
+        
 
     
     

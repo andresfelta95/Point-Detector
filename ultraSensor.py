@@ -213,3 +213,17 @@ class UltraManager:
             return True
         else:
             return False
+        
+    #   Function that will get two lists of distances and check if they are the same within a certain threshold
+    def check_same(self, list1, list2):
+        #   Check if the lists are the same length
+        if len(list1) != len(list2):
+            return False
+        #   Check if the values are the same within a certain threshold (1 cm)
+        for i in range(len(list1)):
+            if abs(list1[i] - list2[i]) > 1:
+                return False
+        return True
+    
+    #   Function that will get two lists of distances and check if they are the same within a certain threshold
+        
