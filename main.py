@@ -93,11 +93,11 @@ class State:
     NextTurn = 5
 
 # Create the variables for the states
-state = State.NoGame
+state = State.GameDart1 #State.NoGame
 previous_state = State.NoGame
 
 # Create the game variables
-game = False
+game =  True #False
 turn = False
 dart = 0
 dart1 = False
@@ -203,7 +203,49 @@ def GameDart2():
         #   Check if the distances are the same as the first dart
         if (UltraManager.check_same(d1Distances, distances)):
             continue
+        #   Get the location of the second dart
+        dart2_location = sensor_manager.get_dart_location(d1Distances, distances)
+        print("Dart 2 Location: " + str(dart2_location))
+        if dart2_location == (None,None):
+            continue
+        else:
+            d2Distances = distances
+            state = State.GameDart3
+            return
         
+    #   If 10 seconds have passed, then move to the GameDart3 state
+    dart2_location = (None,None)
+    print("Dart 2 Location: " + str(dart2_location))
+    d2Distances = distances
+    state = State.GameDart3
+
+#   Create the function to detect the third dart
+def GameDart3():
+    #   Cheack if there is a game
+    if game == False:
+        state = State.NoGame
+        return
+    #   Set the timer
+    timer = time.ticks_ms()
+    #   Read the distances until a dart is detected or 10 seconds have passed
+    while time.ticks_diff(time.ticks_ms(), timer) < 10000:
+        distances = sensor_manager.read_distances()
+        #   Check if the distances are the same as the second dart
+        if (UltraManager.check_same(d2Distances, distances)):
+            continue
+        #   Get the location of the third dart
+        dart3_location = sensor_manager.get_dart_location(d2Distances, distances)
+        print("Dart 3 Location: " + str(dart3_location))
+        if dart3_location == (None,None):
+            continue
+        else:
+            state = State.NextTurn
+            return
+        
+    #   If 10 seconds have passed, then move to the NextTurn state
+    dart3_location = (None,None)
+    print("Dart 3 Location: " + str(dart3_location))
+    state = State.NextTurn
 
     
     
@@ -216,40 +258,49 @@ while True:
     # distances = sensor_manager.read_distances()
     # print(distances)
     # time.sleep(1)
-    GameDart1()
     time.sleep(1)
-    # if state == State.NoGame:
-    #     print("No Game")
-    #     if game == False:
-    #         print("No Game")
+    if state == State.NoGame:
+        print("No Game")
+        if game == False:
+            print("No Game")
     #         #   Ask the server if there is a game
     #         #   If there is a game, then move to the ClearBoard state
     #         #   If there is no game, then stay in the NoGame state
-    #     else:
-    #         print("Game")
+        else:
+            print("Game")
     #         #   Ask the server if there is a turn
     #         #   If there is a turn, then move to the ClearBoard state
     #         #   If there is no turn, then stay in the NoGame state
-    # elif state == State.ClearBoard:
-    #     print("Clear Board")
+    elif state == State.ClearBoard:
+        print("Clear Board")
         #   Clear the board
         #   Move to the GameDart1 state
-    # elif state == State.GameDart1:
+    elif state == State.GameDart1:
+        print("Game Dart 1")
+        GameDart1()
         #   Detect the first dart
         #   If the first dart is detected, then move to the GameDart2 state
         #   If the first dart is not detected, then stay in the GameDart1 state
-    # elif state == State.GameDart2:
+    elif state == State.GameDart2:
+        print("Game Dart 2")
+        GameDart2()
         #   Detect the second dart
         #   If the second dart is detected, then move to the GameDart3 state
         #   If the second dart is not detected, then stay in the GameDart2 state
-    # elif state == State.GameDart3:
+    elif state == State.GameDart3:
+        print("Game Dart 3")
+        GameDart3()
         #   Detect the third dart
         #   If the third dart is detected, then move to the NextTurn state
         #   If the third dart is not detected, then stay in the GameDart3 state
-    # elif state == State.NextTurn:
+    elif state == State.NextTurn:
+        print("Next Turn")
+        state = State.ClearBoard
         #   Ask the server if there is a turn
         #   If there is a turn, then move to the ClearBoard state
         #   If there is no turn, then move to the NoGame state
+
+    time.sleep(1)
         
 
 

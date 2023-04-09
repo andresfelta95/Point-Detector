@@ -143,6 +143,77 @@ class UltraManager:
                 return left, index
             else:
                 return index, right
+            
+    #   Function to get the adjacent sensors to an specific sensor given the index
+    def get_adjacent_sensors_index(self, index):
+        #   Check one sensor to the left and one to the right and pick the one with the smallest distance
+        if index == 0:
+            #   If the index is 0, then the sensor to the left is the last sensor
+            left = len(self._distances) - 1
+            right = index + 1
+        elif index == len(self._distances) - 1:
+            #   If the index is the last sensor, then the sensor to the right is the first sensor
+            left = index - 1
+            right = 0
+        else:
+            left = index - 1
+            right = index + 1
+        return left, right
+    
+    #   Function to get the location of the closest object given the index of the sensor
+    def get_location_index(self, index):
+        #   Get the 2 adjacent sensors to the closest object
+        left, right = self.get_adjacent_sensors_index(index)
+        #   Check if the 2 sensors are the same
+        if left == right:
+            #   Get the x and y coordinates from the sensor
+            x1, y1 = self._sensors[left]._location
+            #   Get the distance from the sensor
+            r1 = self._distances[left]
+            #   Calculate the distance from the center (0, 0) and the sensor
+            d = math.sqrt(x1**2 + y1**2)
+            #   Get second radius
+            r2 = d - r1
+            # Calculate the intersection points of the two circles
+            a = (r1**2 - r2**2 + d**2) / (2*d)
+            h = 0
+            x3 = x1 + a*(0 - x1)/d
+            y3 = y1 + a*(0 - y1)/d
+            return x3, y3
+        else:
+            #   Get the x and y coordinates from the sensors
+            x1, y1 = self._sensors[left]._location
+            x2, y2 = self._sensors[right]._location
+            #   Get the distance from the sensors
+            r1 = self._distances[left]
+            r2 = self._distances[right]
+            # Calculate the distance between the centers of the two circles
+            d = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+            
+
+            # Check if the two circles overlap or are disjoint
+            if d > r1 + r2:
+                return "The circles are disjoint"
+            elif d < abs(r1 - r2):
+                return "One circle is inside the other"
+
+            # Calculate the intersection points of the two circles
+            a = (r1**2 - r2**2 + d**2) / (2*d)
+            h = math.sqrt(r1**2 - a**2)
+            x3 = x1 + a*(x2 - x1)/d
+            y3 = y1 + a*(y2 - y1)/d
+            #   Circle Intersections
+            rX1 = x3 + h*(y2 - y1)/d
+            rY1 = y3 - h*(x2 - x1)/d
+            rX2 = x3 - h*(y2 - y1)/d
+            rY2 = y3 + h*(x2 - x1)/d
+
+            #   Check which point is inside the board and return it
+            if self.is_inside_board(rX1, rY1):
+                return (rX1, rY1)
+            else:
+                return (rX2, rY2)
+            
         
     #   Function to get the location of the closest object
     def get_location(self):
@@ -173,32 +244,33 @@ class UltraManager:
                 return (rX1, rY1)
             else:
                 return (rX2, rY2)
-        #   Get the x and y coordinates from the sensors
-        x1, y1 = self._sensors[left]._location
-        x2, y2 = self._sensors[right]._location
-        #   Get the distance from the sensors
-        r1 = self._distances[left]
-        r2 = self._distances[right]
-        # Calculate the distance between the centers of the two circles
-        d = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-        
+        else:
+            #   Get the x and y coordinates from the sensors
+            x1, y1 = self._sensors[left]._location
+            x2, y2 = self._sensors[right]._location
+            #   Get the distance from the sensors
+            r1 = self._distances[left]
+            r2 = self._distances[right]
+            # Calculate the distance between the centers of the two circles
+            d = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+            
 
-        # Check if the two circles overlap or are disjoint
-        if d > r1 + r2:
-            return "The circles are disjoint"
-        elif d < abs(r1 - r2):
-            return "One circle is inside the other"
+            # Check if the two circles overlap or are disjoint
+            if d > r1 + r2:
+                return "The circles are disjoint"
+            elif d < abs(r1 - r2):
+                return "One circle is inside the other"
 
-        # Calculate the intersection points of the two circles
-        a = (r1**2 - r2**2 + d**2) / (2*d)
-        h = math.sqrt(r1**2 - a**2)
-        x3 = x1 + a*(x2 - x1)/d
-        y3 = y1 + a*(y2 - y1)/d
-        #   Circle Intersections
-        rX1 = x3 + h*(y2 - y1)/d
-        rY1 = y3 - h*(x2 - x1)/d
-        rX2 = x3 - h*(y2 - y1)/d
-        rY2 = y3 + h*(x2 - x1)/d
+            # Calculate the intersection points of the two circles
+            a = (r1**2 - r2**2 + d**2) / (2*d)
+            h = math.sqrt(r1**2 - a**2)
+            x3 = x1 + a*(x2 - x1)/d
+            y3 = y1 + a*(y2 - y1)/d
+            #   Circle Intersections
+            rX1 = x3 + h*(y2 - y1)/d
+            rY1 = y3 - h*(x2 - x1)/d
+            rX2 = x3 - h*(y2 - y1)/d
+            rY2 = y3 + h*(x2 - x1)/d
 
         #   Check which point is inside the board and return it
         if self.is_inside_board(rX1, rY1):
@@ -225,5 +297,28 @@ class UltraManager:
                 return False
         return True
     
-    #   Function that will get two lists of distances and check if they are the same within a certain threshold
+    #   Function that will get two lists of distances 
+    #   The first list will be the state of the sensors before a new dart is thrown
+    #   The second list will be the state of the sensors after a new dart is thrown
+    #   The function will return the location of the dart
+    def get_dart_location(self, list1, list2):
+        #   Check if the lists are the same
+        if self.check_same(list1, list2):
+            #   If the lists are the same, then the dart is not thrown
+            return (None, None)
+        else:
+            #   Check which dart has the biggiest change in distance compared to the previous state
+            biggest_change = 0
+            biggest_change_index = 0
+            for i in range(len(list1)):
+                if abs(list1[i] - list2[i]) > biggest_change:
+                    biggest_change = abs(list1[i] - list2[i])
+                    biggest_change_index = i
+            #   Set that list into the distances list
+            self._distances = list2
+            #   Get the location of the dart
+            (x, y) = self.get_location_index(biggest_change_index)
+            #   Return the location of the dart
+            return (x, y)
+
         
