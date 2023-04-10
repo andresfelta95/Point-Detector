@@ -143,8 +143,9 @@ timer = time.ticks_ms()
 
 #   Create the function to clear the board
 def ClearBoard():
+    global distances
     distances = sensor_manager.read_distances()
-    #   If all the distances are more than 35 cm, then move to the GameDart1 state
+    # If all the distances are more than 35 cm, then move to the GameDart1 state
     for distance in distances:
         if distance < 30:
             return State.ClearBoard
@@ -152,13 +153,17 @@ def ClearBoard():
 
 #   Create the function to detect the first dart
 def GameDart1():
+    #   Global variables
+    global distances
+    global dart1_location
+    global d1Distances
     #   Cheack if there is a game
     if game == False:
         return State.NoGame
     #   Set the timer
     timer = time.ticks_ms()
-    #   Read the distances until a dart is detected or 10 seconds have passed
-    while time.ticks_diff(time.ticks_ms(), timer) < 10000:
+    #   Read the distances until a dart is detected or 20 seconds have passed
+    while time.ticks_diff(time.ticks_ms(), timer) < 20000:
         distances = sensor_manager.read_distances()
         bullseye = 0
         for distance in distances:
@@ -169,7 +174,7 @@ def GameDart1():
         if bullseye == 10:
             dart1_location = (0,0)
             print("Dart 1 Location: " + str(dart1_location))
-            d1Distances.extend(distances)
+            d1Distances = distances
             return State.GameDart2
         #   If a dart is detected, then move to the GameDart2 state
         for distance in distances:
@@ -188,24 +193,31 @@ def GameDart1():
 
 #   Create the function to detect the second dart
 def GameDart2():
+    #   Global variables
+    global distances
+    global dart1_location
+    global dart2_location
+    global d1Distances
+    global d2Distances
     #   Cheack if there is a game
     if game == False:
         return State.NoGame
     #   Set the timer
     timer = time.ticks_ms()
-    #   Read the distances until a dart is detected or 10 seconds have passed
-    while time.ticks_diff(time.ticks_ms(), timer) < 10000:
+    #   Read the distances until a dart is detected or 20 seconds have passed
+    while time.ticks_diff(time.ticks_ms(), timer) < 20000:
         distances = sensor_manager.read_distances()
         #   Check if the distances are the same as the first dart
         if (sensor_manager.check_same(d1Distances, distances)):
             continue
+        distances = sensor_manager.read_distances()
         #   Get the location of the second dart
         dart2_location = sensor_manager.get_dart_location(d1Distances, distances)
         print("Dart 2 Location: " + str(dart2_location))
         if dart2_location == (None,None):
             continue
         else:
-            d2Distances.extend(distances)
+            d2Distances = distances
             return State.GameDart3
         
     #   If 10 seconds have passed, then move to the GameDart3 state
@@ -216,17 +228,24 @@ def GameDart2():
 
 #   Create the function to detect the third dart
 def GameDart3():
+    #   Global variables
+    global distances
+    global dart2_location
+    global dart3_location
+    global d2Distances
+
     #   Cheack if there is a game
     if game == False:
         return State.NoGame
     #   Set the timer
     timer = time.ticks_ms()
-    #   Read the distances until a dart is detected or 10 seconds have passed
-    while time.ticks_diff(time.ticks_ms(), timer) < 10000:
+    #   Read the distances until a dart is detected or 20 seconds have passed
+    while time.ticks_diff(time.ticks_ms(), timer) < 20000:
         distances = sensor_manager.read_distances()
         #   Check if the distances are the same as the second dart
         if (sensor_manager.check_same(d2Distances, distances)):
             continue
+        distances = sensor_manager.read_distances()
         #   Get the location of the third dart
         dart3_location = sensor_manager.get_dart_location(d2Distances, distances)
         print("Dart 3 Location: " + str(dart3_location))
@@ -271,18 +290,26 @@ while True:
     elif state == State.GameDart1:
         print("Game Dart 1")
         state = GameDart1()
+        print(distances)
+        print(d1Distances)
+        print(dart1_location)
         #   Detect the first dart
         #   If the first dart is detected, then move to the GameDart2 state
         #   If the first dart is not detected, then stay in the GameDart1 state
     elif state == State.GameDart2:
         print("Game Dart 2")
         state = GameDart2()
+        print(distances)
+        print(d2Distances)
+        print(dart2_location)
         #   Detect the second dart
         #   If the second dart is detected, then move to the GameDart3 state
         #   If the second dart is not detected, then stay in the GameDart2 state
     elif state == State.GameDart3:
         print("Game Dart 3")
         state = GameDart3()
+        print(distances)
+        print(dart3_location)
         #   Detect the third dart
         #   If the third dart is detected, then move to the NextTurn state
         #   If the third dart is not detected, then stay in the GameDart3 state

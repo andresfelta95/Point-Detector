@@ -158,7 +158,16 @@ class UltraManager:
         else:
             left = index - 1
             right = index + 1
-        return left, right
+        #   Check if right and left distances are more than 30 cm
+        if self._distances[left] > 30 and self._distances[right] > 30:
+            #   If both are more than 30 cm, then return the same sensor
+            return index, index
+        else:
+            #   Check which sensor has the smallest distance
+            if self._distances[left] < self._distances[right]:
+                return left, index
+            else:
+                return index, right
     
     #   Function to get the location of the closest object given the index of the sensor
     def get_location_index(self, index):
@@ -179,7 +188,7 @@ class UltraManager:
             h = 0
             x3 = x1 + a*(0 - x1)/d
             y3 = y1 + a*(0 - y1)/d
-            return x3, y3
+            return (x3, y3)
         else:
             #   Get the x and y coordinates from the sensors
             x1, y1 = self._sensors[left]._location
@@ -288,13 +297,15 @@ class UltraManager:
         
     #   Function that will get two lists of distances and check if they are the same within a certain threshold
     def check_same(self, list1, list2):
-        #   Check if the lists are the same length
-        if len(list1) != len(list2):
-            return False
         #   Check if the values are the same within a certain threshold (1 cm)
         for i in range(len(list1)):
             if abs(list1[i] - list2[i]) > 1:
-                return False
+                #   if the values are more than 30 cm ignore them
+                if list1[i] > 30 or list2[i] > 30:
+                    continue
+                else:
+                    #   If the values are not the same, return False
+                    return False
         return True
     
     #   Function that will get two lists of distances 
@@ -303,22 +314,22 @@ class UltraManager:
     #   The function will return the location of the dart
     def get_dart_location(self, list1, list2):
         #   Check if the lists are the same
-        if self.check_same(list1, list2):
+        # if self.check_same(list1, list2):
             #   If the lists are the same, then the dart is not thrown
-            return (None, None)
-        else:
-            #   Check which dart has the biggiest change in distance compared to the previous state
-            biggest_change = 0
-            biggest_change_index = 0
-            for i in range(len(list1)):
-                if abs(list1[i] - list2[i]) > biggest_change:
-                    biggest_change = abs(list1[i] - list2[i])
-                    biggest_change_index = i
-            #   Set that list into the distances list
-            self._distances = list2
-            #   Get the location of the dart
-            (x, y) = self.get_location_index(biggest_change_index)
-            #   Return the location of the dart
-            return (x, y)
+            # return (None, None)
+        # else:
+        #   Check which dart has the biggiest change in distance compared to the previous state
+        biggest_change = 0
+        biggest_change_index = 0
+        for i in range(len(list1)):
+            if abs(list1[i] - list2[i]) > biggest_change:
+                biggest_change = abs(list1[i] - list2[i])
+                biggest_change_index = i
+        #   Set that list into the distances list
+        self._distances = list2
+        #   Get the location of the dart
+        (x, y) = self.get_location_index(biggest_change_index)
+        #   Return the location of the dart
+        return (x, y)
 
         
