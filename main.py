@@ -66,11 +66,11 @@ mux = Mux(18, 5, 17, 16, 19)
 # trig = Pin(4, Pin.OUT) #was pin 15 
 
 # Create the sensors objects
-sensor0 = UltraSensor(13, 0, 19.8, 0.0161, 1.6172) # Pin 13 , location (0,19.8)
-sensor1 = UltraSensor(12, 11.8, 15.2, 0.0158, 1.7105) # Pin 12 , location (11.4,16.2)
-sensor2 = UltraSensor(14, 18.9, 6, 0.016, 1.9421) # Pin 14 , location (18.8,6)
-sensor3 = UltraSensor(27, 18.1, -6, 0.0158, 2.1619) # Pin 27 , location (18.8,-6)
-sensor4 = UltraSensor(26, 10.7, -15.4, 0.0153, 2.294) # Pin 26 , location (11.4,-16.2)
+sensor0 = UltraSensor(13, 0, 19.5, 0.0161, 1.6172) # Pin 13 , location (0,19.8)
+sensor1 = UltraSensor(12, 11.8, 15.5, 0.0158, 1.7105) # Pin 12 , location (11.4,16.2)
+sensor2 = UltraSensor(14, 18.9, 5.5, 0.016, 1.9421) # Pin 14 , location (18.8,6)
+sensor3 = UltraSensor(27, 18.6, -6.5, 0.0158, 2.1619) # Pin 27 , location (18.8,-6)
+sensor4 = UltraSensor(26, 10.4, -16.4, 0.0153, 2.294) # Pin 26 , location (11.4,-16.2)
 sensor5 = UltraSensor(25, 0, -19.7, 0.0158, 1.1089) # Pin 25 , location (0,-19.8)
 sensor6 = UltraSensor(33, -12, -16.2, 0.0164, 1.1967) # Pin 33 , location (-11.4,-16.2)
 sensor7 = UltraSensor(32, -18.6, -5.3, 0.0152, 1.8608) # Pin 32 , location (-18.8,-6)
