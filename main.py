@@ -179,12 +179,18 @@ def GameDart1():
         #   If a dart is detected, then move to the GameDart2 state
         for distance in distances:
             if distance < 30:
+                #   Wait 1 second
+                time.sleep(1)
+                #   Read the distances
                 distances = sensor_manager.read_distances()
+                #   Get the location of the dart
                 dart1_location = sensor_manager.get_location()
                 print("Dart 1 Location: " + str(dart1_location))
                 d1Distances = distances
                 #   If a dart is detected, then move to the GameDart2 state
                 return State.GameDart2
+        #   Wait 1 second
+        time.sleep(1)
     #   If 10 seconds have passed, then move to the GameDart2 state
     dart1_location = (None,None)
     print("Dart 1 Location: " + str(dart1_location))
