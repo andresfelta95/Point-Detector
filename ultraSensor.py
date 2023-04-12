@@ -66,7 +66,7 @@ class UltraSensor:
             distances.remove(max(distances))
         # print(distances)
         cm = sum(distances) / len(distances)
-        cm = (cm * 340 / 20000) + 1.7
+        cm = (cm * 340 / 20000) + 1.5
         #   Return the average distance
         return round(cm, 4)
     
@@ -324,10 +324,12 @@ class UltraManager:
     #   The function will return the location of the dart
     def get_dart_location(self, dList1, dList2):
         #   Check which dart has the biggiest change in distance compared to the previous state
-        biggest_change = 0
+        biggest_change = 1
         biggest_change_index = 0
         for i in range(len(dList1)):
             if abs(dList1[i] - dList2[i]) > biggest_change:
+                if dList1[i] > 20 or dList2[i] > 20:
+                    continue
                 biggest_change = abs(dList1[i] - dList2[i])
                 biggest_change_index = i
         #   Set that list into the distances list

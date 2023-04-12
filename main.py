@@ -66,16 +66,16 @@ mux = Mux(18, 5, 17, 16, 19)
 # trig = Pin(4, Pin.OUT) #was pin 15 
 
 # Create the sensors objects
-sensor0 = UltraSensor(13, 0, 19.5, 0.0161, 1.6172) # Pin 13 , location (0,19.8)
-sensor1 = UltraSensor(12, 11.8, 15.5, 0.0158, 1.7105) # Pin 12 , location (11.4,16.2)
-sensor2 = UltraSensor(14, 18.9, 5.5, 0.016, 1.9421) # Pin 14 , location (18.8,6)
-sensor3 = UltraSensor(27, 18.6, -6.5, 0.0158, 2.1619) # Pin 27 , location (18.8,-6)
-sensor4 = UltraSensor(26, 10.4, -16.4, 0.0153, 2.294) # Pin 26 , location (11.4,-16.2)
+sensor0 = UltraSensor(13, 0.5, 19.5, 0.0161, 1.6172) # Pin 13 , location (0,19.8)
+sensor1 = UltraSensor(12, 11.6, 15.2, 0.0158, 1.7105) # Pin 12 , location (11.4,16.2)
+sensor2 = UltraSensor(14, 18.8, 5.7, 0.016, 1.9421) # Pin 14 , location (18.8,6)
+sensor3 = UltraSensor(27, 18.6, -6.2, 0.0158, 2.1619) # Pin 27 , location (18.8,-6)
+sensor4 = UltraSensor(26, 11, -16.2, 0.0153, 2.294) # Pin 26 , location (11.4,-16.2)
 sensor5 = UltraSensor(25, 0, -19.7, 0.0158, 1.1089) # Pin 25 , location (0,-19.8)
-sensor6 = UltraSensor(33, -12, -16.2, 0.0164, 1.1967) # Pin 33 , location (-11.4,-16.2)
-sensor7 = UltraSensor(32, -18.6, -5.3, 0.0152, 1.8608) # Pin 32 , location (-18.8,-6)
-sensor8 = UltraSensor(35, -18.6, 6.8, 0.0154, 1.9196) # Pin 35 , location (-18.8,6)
-sensor9 = UltraSensor(34, -11.7, 17, 0.0158, 1.7896) # Pin 34 , location (-11.4,16.2)
+sensor6 = UltraSensor(33, -11.7, -15.9, 0.0164, 1.1967) # Pin 33 , location (-11.4,-16.2)
+sensor7 = UltraSensor(32, -18.6, -5.6, 0.0152, 1.8608) # Pin 32 , location (-18.8,-6)
+sensor8 = UltraSensor(35, -18.4, 6.6, 0.0154, 1.9196) # Pin 35 , location (-18.8,6)
+sensor9 = UltraSensor(34, -11.4, 16.2, 0.0158, 1.7896) # Pin 34 , location (-11.4,16.2)
 
 # Create the list of sensors
 sensors = [sensor0, sensor1, sensor2, sensor3, sensor4, sensor5, sensor6, sensor7, sensor8, sensor9]
@@ -216,6 +216,9 @@ def GameDart2():
         #   Check if the distances are the same as the first dart
         if (sensor_manager.check_same(d1Distances, distances)):
             continue
+        #   Wait 1 second
+        time.sleep(1)
+        #   Read the distances
         distances = sensor_manager.read_distances()
         #   Get the location of the second dart
         dart2_location = sensor_manager.get_dart_location(d1Distances, distances)
@@ -251,6 +254,9 @@ def GameDart3():
         #   Check if the distances are the same as the second dart
         if (sensor_manager.check_same(d2Distances, distances)):
             continue
+        #   Wait 1 second
+        time.sleep(1)
+        #   Read the distances
         distances = sensor_manager.read_distances()
         #   Get the location of the third dart
         dart3_location = sensor_manager.get_dart_location(d2Distances, distances)
