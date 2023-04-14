@@ -127,6 +127,10 @@ server_port = 0
 #         pass
 # print('network config:', sta_if.ifconfig())
 
+# Variable for the Web Server
+web_server = False
+
+
 # Create list of distances, d1Distances, d2Distances
 distances = []
 d1Distances = []
