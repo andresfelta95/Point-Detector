@@ -132,23 +132,23 @@ print('network config:', sta_if.ifconfig())
 # Make a POST request to the PHP file with X and Y values
 x = 10
 y = 20
-response = requests.post(PHP_URL, json = {'x': x, 'y': y})
 url = "https://thor.cnt.sast.ca/~atangari/CMPE2550/Project/esp32Server.php"
-data = {"x": x, "y": y}
+data1 = {"x": x, "y": y}
+data_json = ujson.dumps(data1)
 headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
-response = requests.post(url, data=data, headers=headers)
+response = requests.post(url, data=data_json, headers=headers)
 print(response.text)
 response.close()
 
 #   Create a post request to the server
-data = {"valueX": 1, "valueY": 1}
+data = {"valueX": x, "valueY": y}
 #   convert the data to json
-data_json = ujson.dumps(data)
+data_json1 = ujson.dumps(data)
 #   Create the headers
 headers = {"Content-Type": "application/json"}
 #   Create the request
-response = requests.post("https://thor.cnt.sast.ca/~kevenlou/distance/distance.php", json = data_json)
+response = requests.post("https://thor.cnt.sast.ca/~kevenlou/distance/distance.php", data = data_json1, headers = headers)
 print(response.text)
 response.close()
 
