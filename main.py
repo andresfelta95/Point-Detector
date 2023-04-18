@@ -58,6 +58,8 @@ from mux import Mux
 from ultraSensor import *
 import math
 import network
+import urequests as requests
+import ujson
 
 # Create the Multiplexer object
 mux = Mux(18, 5, 17, 16, 19)
@@ -108,27 +110,51 @@ dart2_location = (0,0)
 dart3_location = (0,0)
 
 # Create the variables for the server
-server = False
+server = True
 server_ip = ""
 server_port = 0
 
 # # Create the variables for the WiFi
-# wifi = False
-# wifi_ssid = "Mi 10T Pro"
-# wifi_password = "teamovida"
+wifi = False
+wifi_ssid = "Mi 10T Pro"
+wifi_password = "teamovida"
 
 #   Connect to the WiFi
-# sta_if = network.WLAN(network.STA_IF)
-# if not sta_if.isconnected():
-#     print('connecting to network...')
-#     sta_if.active(True)
-#     sta_if.connect(wifi_ssid, wifi_password)
-#     while not sta_if.isconnected():
-#         pass
-# print('network config:', sta_if.ifconfig())
+sta_if = network.WLAN(network.STA_IF)
+if not sta_if.isconnected():
+    print('connecting to network...')
+    sta_if.active(True)
+    sta_if.connect(wifi_ssid, wifi_password)
+    while not sta_if.isconnected():
+        pass
+print('network config:', sta_if.ifconfig())
 
-# Variable for the Web Server
-web_server = False
+# Make a POST request to the PHP file with X and Y values
+x = 10
+y = 20
+response = requests.post(PHP_URL, json = {'x': x, 'y': y})
+url = "https://thor.cnt.sast.ca/~atangari/CMPE2550/Project/esp32Server.php"
+data = {"x": x, "y": y}
+headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
+response = requests.post(url, data=data, headers=headers)
+print(response.text)
+response.close()
+
+#   Create a post request to the server
+data = {"valueX": 1, "valueY": 1}
+#   convert the data to json
+data_json = ujson.dumps(data)
+#   Create the headers
+headers = {"Content-Type": "application/json"}
+#   Create the request
+response = requests.post("https://thor.cnt.sast.ca/~kevenlou/distance/distance.php", json = data_json)
+print(response.text)
+response.close()
+
+
+    
+
 
 
 # Create list of distances, d1Distances, d2Distances
