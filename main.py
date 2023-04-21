@@ -60,12 +60,13 @@ import math
 import network
 import urequests as requests
 import ujson
+from neopixel import NeoPixel
 
 # Create the Multiplexer object
 mux = Mux(18, 5, 17, 16, 19)
 
-#Setting the trigger 
-# trig = Pin(4, Pin.OUT) #was pin 15 
+#Setting the NeoPixel
+np = NeoPixel(Pin(15), 12)
 
 # Create the sensors objects
 sensor0 = UltraSensor(13, 0.5, 19.5, 0.0161, 1.6172) # Pin 13 , location (0,19.8)
@@ -95,31 +96,67 @@ class State:
     NextTurn = 5
 
 # Create the variables for the states
-state = State.GameDart1 #State.NoGame
+state = State.NoGame
 previous_state = State.NoGame
 
 # Create the game variables
-game =  True #False
-turn = False
-dart = 0
-dart1 = False
-dart2 = False
-dart3 = False
+game = False
+game_id = 0
+player_id = 0
+game_turn = 0
 dart1_location = (0,0)
 dart2_location = (0,0)
 dart3_location = (0,0)
-
-# Create the variables for the server
-server = True
-server_ip = ""
-server_port = 0
+# Create list of distances, d1Distances, d2Distances
+distances = []
+d1Distances = []
+d2Distances = []
+d3Distances = []
 
 # # Create the variables for the WiFi
 wifi = False
 wifi_ssid = "Mi 10T Pro"
 wifi_password = "teamovida"
 
+
+#   Create a timer
+timer = time.ticks_ms()
+
+################################ NeoPixel Functions ################################
+
+#   Function to turn off the NeoPixel
+def NeoPixelOff():
+    for i in range(12):
+        np[i] = (0,0,0)
+    np.write()
+
+#   Function to set the neo pixel to green, quarter brightness
+def NeoPixelGreen():
+    for i in range(12):
+        np[i] = (0, 64, 0)
+    np.write()
+
+#   Function to set the neo pixel to red, quarter brightness
+def NeoPixelRed():
+    for i in range(12):
+        np[i] = (64, 0, 0)
+    np.write()
+
+#   Function to set the neo pixel to blue, quarter brightness
+def NeoPixelBlue():
+    for i in range(12):
+        np[i] = (0, 0, 64)
+    np.write()
+
+#   Function to set the neo pixel to orange, quarter brightness
+def NeoPixelOrange():
+    for i in range(12):
+        np[i] = (64, 64, 0)
+    np.write()
+
+############################### Testing ########################################
 #   Connect to the WiFi
+NeoPixelBlue()
 sta_if = network.WLAN(network.STA_IF)
 if not sta_if.isconnected():
     print('connecting to network...')
@@ -128,10 +165,12 @@ if not sta_if.isconnected():
     while not sta_if.isconnected():
         pass
 print('network config:', sta_if.ifconfig())
+NeoPixelGreen()
 
 # Make a POST request to the PHP file with X and Y values
 x = 10
 y = 20
+NeoPixelBlue()
 url = "https://thor.cnt.sast.ca/~atangari/CMPE2550/Project/esp32Server.php"
 data1 = {"x": x, "y": y}
 data_json = ujson.dumps(data1)
@@ -151,34 +190,59 @@ headers = {"Content-Type": "application/json"}
 response = requests.post("https://thor.cnt.sast.ca/~kevenlou/distance/distance.php", data = data_json1, headers = headers)
 print(response.text)
 response.close()
+NeoPixelGreen()
 
+################################ Game Functions ################################
 
+#   Create the function to check if there is a game
+def NoGame():
+    global game
+    global game_id
+    global player_id
+    global game_turn
+    global url
+    #   Create a get request to the server
+    data = {"action": "check"}
+    #   convert the data to json
+    data_json = ujson.dumps(data)
+    try:
+        response = requests.request("GET", url, data = data_json)
+        #   Get the response
+        response = response.text
+        print(response)
+        response.close()
+    except:
+        print("Error")
     
-
-
-
-# Create list of distances, d1Distances, d2Distances
-distances = []
-d1Distances = []
-d2Distances = []
-
-# Create the variable for the location
-location = (0,0)
-
-# Create the variable for the game
-game = True
-
-#   Create a timer
-timer = time.ticks_ms()
+    #   Check if there is a game
+    if game == False:
+        return State.NoGame
+    #   If there is a game, then move to the ClearBoard state
+    return State.ClearBoard
 
 #   Create the function to clear the board
 def ClearBoard():
     global distances
+    global dart1_location
+    global dart2_location
+    global dart3_location
+    global d1Distances
+    global d2Distances
+    global d3Distances
     distances = sensor_manager.read_distances()
+    # Set neopixel to orange
+    NeoPixelOrange()
     # If all the distances are more than 35 cm, then move to the GameDart1 state
     for distance in distances:
         if distance < 30:
             return State.ClearBoard
+    #   Reset the game variables
+    dart1_location = (0,0)
+    dart2_location = (0,0)
+    dart3_location = (0,0)
+    d1Distances = []
+    d2Distances = []
+    d3Distances = []
     return State.GameDart1
 
 #   Create the function to detect the first dart
@@ -301,13 +365,36 @@ def GameDart3():
     print("Dart 3 Location: " + str(dart3_location))
     return State.NextTurn
 
+#   Create the function to move to the next turn
+def NextTurn():
+    #   Global variables
+    global game
+    global url
+    global game_id
+    global player_id
+    global game_turn
+    #   Ask the server if it is the next turn
+    #   If it is the next turn, then move to the ClearBoard state
+    #   If it is not the next turn, then move to the NoGame state
+    data = {"action": "nextTurn"}
+    data_json = ujson.dumps(data)
+    response = requests.request("GET", url, data=data_json)
+    response = response.text
+    print(response)
+
+    #   Cheack if there is a game
+    if game == False:
+        return State.NoGame
+    #   Clear the board
+    return State.GameDart1
+
     
     
 
 
 
-    
 
+############################# Main Loop #############################
 while True:
     # distances = sensor_manager.read_distances()
     # print(distances)
@@ -315,6 +402,7 @@ while True:
     # time.sleep(1)
     if state == State.NoGame:
         print("No Game")
+        state = NoGame()
         if game == False:
             print("No Game")
     #         #   Ask the server if there is a game
