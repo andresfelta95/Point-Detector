@@ -168,18 +168,8 @@ print('network config:', sta_if.ifconfig())
 NeoPixelGreen()
 #   Delay for 1 seconds
 time.sleep(1)
-
-# Make a POST request to the PHP file with X and Y values
-x = 10
-y = 20
-NeoPixelBlue()
+#   Define the url
 url = "https://thor.cnt.sast.ca/~atangari/CMPE2550/Project/esp32Server.php"
-data1 = {"x": x, "y": y}
-data_json = ujson.dumps(data1)
-response = requests.post(url, data=data_json)
-print(response.text)
-response.close()
-NeoPixelGreen()
 
 ################################ Game Functions ################################
 
@@ -231,9 +221,9 @@ def ClearBoard():
     global d1Distances
     global d2Distances
     global d3Distances
-    distances = sensor_manager.read_distances()
     # Set neopixel to orange
     NeoPixelOrange()
+    distances = sensor_manager.read_distances()
     # If all the distances are more than 35 cm, then move to the GameDart1 state
     for distance in distances:
         if distance < 30:
@@ -456,37 +446,27 @@ while True:
         state = NoGame()
     elif state == State.ClearBoard:
         print("Clear Board")
-        #   Clear the board
-        #   Move to the GameDart1 state
+        state = ClearBoard()
     elif state == State.GameDart1:
         print("Game Dart 1")
         state = GameDart1()
         print(distances)
         print(d1Distances)
         print(dart1_location)
-        #   Detect the first dart
-        #   If the first dart is detected, then move to the GameDart2 state
-        #   If the first dart is not detected, then stay in the GameDart1 state
     elif state == State.GameDart2:
         print("Game Dart 2")
         state = GameDart2()
         print(distances)
         print(d2Distances)
         print(dart2_location)
-        #   Detect the second dart
-        #   If the second dart is detected, then move to the GameDart3 state
-        #   If the second dart is not detected, then stay in the GameDart2 state
     elif state == State.GameDart3:
         print("Game Dart 3")
         state = GameDart3()
         print(distances)
         print(dart3_location)
-        #   Detect the third dart
-        #   If the third dart is detected, then move to the NextTurn state
-        #   If the third dart is not detected, then stay in the GameDart3 state
     elif state == State.NextTurn:
         print("Next Turn")
-        state = State.ClearBoard
+        state = NextTurn()
         #   Ask the server if there is a turn
         #   If there is a turn, then move to the ClearBoard state
         #   If there is no turn, then move to the NoGame state
