@@ -166,6 +166,8 @@ if not sta_if.isconnected():
         pass
 print('network config:', sta_if.ifconfig())
 NeoPixelGreen()
+#   Delay for 1 seconds
+time.sleep(1)
 
 # Make a POST request to the PHP file with X and Y values
 x = 10
@@ -174,20 +176,7 @@ NeoPixelBlue()
 url = "https://thor.cnt.sast.ca/~atangari/CMPE2550/Project/esp32Server.php"
 data1 = {"x": x, "y": y}
 data_json = ujson.dumps(data1)
-headers = {"Content-Type": "application/x-www-form-urlencoded"}
-
-response = requests.post(url, data=data_json, headers=headers)
-print(response.text)
-response.close()
-
-#   Create a post request to the server
-data = {"valueX": x, "valueY": y}
-#   convert the data to json
-data_json1 = ujson.dumps(data)
-#   Create the headers
-headers = {"Content-Type": "application/json"}
-#   Create the request
-response = requests.post("https://thor.cnt.sast.ca/~kevenlou/distance/distance.php", data = data_json1, headers = headers)
+response = requests.post(url, data=data_json)
 print(response.text)
 response.close()
 NeoPixelGreen()
@@ -201,6 +190,7 @@ def NoGame():
     global player_id
     global game_turn
     global url
+    NeoPixelBlue()
     #   Request to the server
     data = {"action": "check"}
     #   convert the data to json
@@ -209,6 +199,18 @@ def NoGame():
         response = requests.request("GET", url, data = data_json)
         #   Get the response
         response = response.text
+        #   Convert the response to json
+        response = ujson.loads(response)
+        #   Check the gameStatus
+        game = response["gameStatus"]
+        #   If there is a game, then get the game_id, player_id, and game_turn
+        if game == True:
+            game_id = response["game_id"]
+            player_id = response["player_id"]
+            game_turn = response["game_turn"]
+            print("Game ID: " + str(game_id))
+            print("Player ID: " + str(player_id))
+            print("Game Turn: " + str(game_turn))
         print(response)
         response.close()
     except:
@@ -448,23 +450,10 @@ def NextTurn():
 
 ############################# Main Loop #############################
 while True:
-    # distances = sensor_manager.read_distances()
-    # print(distances)
-    # time.sleep(1)
     # time.sleep(1)
     if state == State.NoGame:
         print("No Game")
         state = NoGame()
-        if game == False:
-            print("No Game")
-    #         #   Ask the server if there is a game
-    #         #   If there is a game, then move to the ClearBoard state
-    #         #   If there is no game, then stay in the NoGame state
-        else:
-            print("Game")
-    #         #   Ask the server if there is a turn
-    #         #   If there is a turn, then move to the ClearBoard state
-    #         #   If there is no turn, then stay in the NoGame state
     elif state == State.ClearBoard:
         print("Clear Board")
         #   Clear the board
