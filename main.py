@@ -194,14 +194,14 @@ NeoPixelGreen()
 
 ################################ Game Functions ################################
 
-#   Create the function to check if there is a game
+#   Function to check if there is a game
 def NoGame():
     global game
     global game_id
     global player_id
     global game_turn
     global url
-    #   Create a get request to the server
+    #   Request to the server
     data = {"action": "check"}
     #   convert the data to json
     data_json = ujson.dumps(data)
@@ -220,7 +220,7 @@ def NoGame():
     #   If there is a game, then move to the ClearBoard state
     return State.ClearBoard
 
-#   Create the function to clear the board
+#   Function to clear the board
 def ClearBoard():
     global distances
     global dart1_location
@@ -245,7 +245,7 @@ def ClearBoard():
     d3Distances = []
     return State.GameDart1
 
-#   Create the function to detect the first dart
+#   Function to detect the first dart
 def GameDart1():
     #   Global variables
     global distances
@@ -256,8 +256,11 @@ def GameDart1():
         return State.NoGame
     #   Set the timer
     timer = time.ticks_ms()
+    #   Set the NeoPixel to green
+    NeoPixelGreen()
     #   Read the distances until a dart is detected or 20 seconds have passed
-    while time.ticks_diff(time.ticks_ms(), timer) < 20000:
+    while time.ticks_diff(time.ticks_ms(), timer) < 20000:        
+        #   Read the distances
         distances = sensor_manager.read_distances()
         bullseye = 0
         for distance in distances:
@@ -265,33 +268,43 @@ def GameDart1():
                 bullseye = bullseye + 1
             else:
                 bullseye = 0
+        #   If the bullseye is detected, then move to the GameDart2 state
         if bullseye == 10:
+            #   Set the NeoPixel to red if a dart is detected
+            NeoPixelRed()
             dart1_location = (0,0)
             print("Dart 1 Location: " + str(dart1_location))
             d1Distances = distances
+            #   Send the dart location to the server
+            SendDartLocation(dart1_location)
             return State.GameDart2
         #   If a dart is detected, then move to the GameDart2 state
         for distance in distances:
             if distance < 30:
-                #   Wait 1 second
-                time.sleep(1)
+                #   Set the NeoPixel to red if a dart is detected
+                NeoPixelRed()
                 #   Read the distances
                 distances = sensor_manager.read_distances()
                 #   Get the location of the dart
                 dart1_location = sensor_manager.get_location()
                 print("Dart 1 Location: " + str(dart1_location))
+                #   Send the dart location to the server
+                SendDartLocation(dart1_location)
                 d1Distances = distances
                 #   If a dart is detected, then move to the GameDart2 state
                 return State.GameDart2
         #   Wait 1 second
         time.sleep(1)
-    #   If 10 seconds have passed, then move to the GameDart2 state
+    #   If 20 seconds have passed, then move to the GameDart2 state
+    NeoPixelRed()
     dart1_location = (None,None)
     print("Dart 1 Location: " + str(dart1_location))
+    #   Send the dart location to the server
+    SendDartLocation(dart1_location)
     d1Distances = distances
     return State.GameDart2
 
-#   Create the function to detect the second dart
+#   Function to detect the second dart
 def GameDart2():
     #   Global variables
     global distances
@@ -304,6 +317,8 @@ def GameDart2():
         return State.NoGame
     #   Set the timer
     timer = time.ticks_ms()
+    #   Set the NeoPixel to green
+    NeoPixelGreen()
     #   Read the distances until a dart is detected or 20 seconds have passed
     while time.ticks_diff(time.ticks_ms(), timer) < 20000:
         distances = sensor_manager.read_distances()
@@ -312,6 +327,8 @@ def GameDart2():
             continue
         #   Wait 1 second
         time.sleep(1)
+        #   Set the NeoPixel to red if a dart is detected
+        NeoPixelRed()
         #   Read the distances
         distances = sensor_manager.read_distances()
         #   Get the location of the second dart
@@ -319,17 +336,22 @@ def GameDart2():
         print("Dart 2 Location: " + str(dart2_location))
         if dart2_location == (None,None):
             continue
-        else:
+        else:            
+            #   Send the dart location to the server
+            SendDartLocation(dart2_location)
             d2Distances = distances
             return State.GameDart3
         
     #   If 10 seconds have passed, then move to the GameDart3 state
+    NeoPixelRed()
     dart2_location = (None,None)
     print("Dart 2 Location: " + str(dart2_location))
+    #   Send the dart location to the server
+    SendDartLocation(dart2_location)
     d2Distances = distances
     return State.GameDart3
 
-#   Create the function to detect the third dart
+#   Function to detect the third dart
 def GameDart3():
     #   Global variables
     global distances
@@ -342,6 +364,8 @@ def GameDart3():
         return State.NoGame
     #   Set the timer
     timer = time.ticks_ms()
+    #   Set the NeoPixel to green
+    NeoPixelGreen()
     #   Read the distances until a dart is detected or 20 seconds have passed
     while time.ticks_diff(time.ticks_ms(), timer) < 20000:
         distances = sensor_manager.read_distances()
@@ -350,6 +374,8 @@ def GameDart3():
             continue
         #   Wait 1 second
         time.sleep(1)
+        #   Set the NeoPixel to red if a dart is detected
+        NeoPixelRed()
         #   Read the distances
         distances = sensor_manager.read_distances()
         #   Get the location of the third dart
@@ -358,14 +384,40 @@ def GameDart3():
         if dart3_location == (None,None):
             continue
         else:
+            #   Send the dart location to the server
+            SendDartLocation(dart3_location)
             return State.NextTurn
         
     #   If 10 seconds have passed, then move to the NextTurn state
+    NeoPixelRed()
     dart3_location = (None,None)
     print("Dart 3 Location: " + str(dart3_location))
+    #   Send the dart location to the server
+    SendDartLocation(dart3_location)
     return State.NextTurn
 
-#   Create the function to move to the next turn
+#   Function to send the dart location to the server
+def SendDartLocation( dart_location ):
+    #   Global variables
+    global game
+    global url
+    global game_id
+    global player_id
+    global game_turn
+    #   Send the dart location to the server
+    data = {"action": "sendDartLocation", 
+            # "game_id": game_id, 
+            # "player_id": player_id, 
+            # "game_turn": game_turn, 
+            "dart_locationx": dart_location[0],
+            "dart_locationy": dart_location[1]
+            }
+    data_json = ujson.dumps(data)
+    response = requests.post(url, data=data_json)
+    response = response.text
+    print(response)
+
+#   Function to move to the next turn
 def NextTurn():
     #   Global variables
     global game
