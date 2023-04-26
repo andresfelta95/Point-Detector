@@ -276,9 +276,9 @@ class UltraManager:
 
             # Check if the two circles overlap or are disjoint
             if d > r1 + r2:
-                return "The circles are disjoint"
+                return ("None", "None")
             elif d < abs(r1 - r2):
-                return "One circle is inside the other"
+                return ("None", "None")
 
             # Calculate the intersection points of the two circles
             a = (r1**2 - r2**2 + d**2) / (2*d)

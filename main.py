@@ -194,7 +194,7 @@ def NoGame():
     #   convert the data to json
     data_json = ujson.dumps(data)
     try:
-        response = requests.request("GET", url, data = data_json)
+        response = requests.post(url, data=data_json)
         #   Get the response
         response = response.text
         #   Convert the response to json
@@ -209,6 +209,8 @@ def NoGame():
             print("Game ID: " + str(game_id))
             print("Player ID: " + str(player_id))
             print("Game Turn: " + str(game_turn))
+        else:
+            print("No Game")
         response.close()
     except:
         print("Error")
@@ -464,28 +466,33 @@ def NextTurn():
     #   Ask the server if it is the next turn
     #   If it is the next turn, then move to the ClearBoard state
     #   If it is not the next turn, then move to the NoGame state
-    data = {
-        "action": "nextTurn",
-        "game_id": game_id,
-        "player_id": player_id,
-        "game_turn": game_turn
-        }
-    data_json = ujson.dumps(data)
-    response = requests.post(url, data=data_json)
-    response = response.text
-    print(response)
-
-    #   Cheack if there is a game
-    if game == False:
+    try:
+        data = {"action": "nextTurn", 
+                "game_id": game_id, 
+                "player_id": player_id, 
+                "game_turn": game_turn
+                }
+        data_json = ujson.dumps(data)
+        response = requests.post(url, data=data_json)
+        response = response.text
+        #   Convert the response to json
+        response = ujson.loads(response)
+        print(response)
+        if response["next_turn"] == True:
+            if player_Turn == 1:
+                player_Turn = 2
+                return State.ClearBoard
+            else:
+                player_Turn = 1
+                game_turn += 1
+                print("Game Turn: " + str(game_turn))
+                return State.ClearBoard
+        else:
+            print("End Game")
+            return State.NoGame
+    except:
+        print("Error")
         return State.NoGame
-    #   Clear the board
-    if player_Turn == 1:
-        player_Turn = 2
-        return State.ClearBoard
-    else:
-        player_Turn = 1
-        game_turn += 1
-        return State.ClearBoard
 
     
     
