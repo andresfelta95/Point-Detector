@@ -169,7 +169,7 @@ NeoPixelGreen()
 #   Delay for 1 seconds
 time.sleep(1)
 #   Define the url
-url = "https://thor.cnt.sast.ca/~atangari/CMPE2550/Project/esp32Server.php"
+url = "https://thor.cnt.sast.ca/~kevenlou/mobileToEsp/game.php"
 
 ################################ Game Functions ################################
 
@@ -182,7 +182,7 @@ def NoGame():
     global url
     NeoPixelBlue()
     #   Request to the server
-    data = {"action": "check"}
+    data = {"action": "gettingNewGame"}
     #   convert the data to json
     data_json = ujson.dumps(data)
     try:
@@ -201,7 +201,6 @@ def NoGame():
             print("Game ID: " + str(game_id))
             print("Player ID: " + str(player_id))
             print("Game Turn: " + str(game_turn))
-        print(response)
         response.close()
     except:
         print("Error")
@@ -289,7 +288,7 @@ def GameDart1():
         time.sleep(1)
     #   If 20 seconds have passed, then move to the GameDart2 state
     NeoPixelRed()
-    dart1_location = (None,None)
+    dart1_location = ("None","None")
     print("Dart 1 Location: " + str(dart1_location))
     #   Send the dart location to the server
     SendDartLocation(dart1_location)
@@ -336,7 +335,7 @@ def GameDart2():
         
     #   If 10 seconds have passed, then move to the GameDart3 state
     NeoPixelRed()
-    dart2_location = (None,None)
+    dart2_location = ("None","None")
     print("Dart 2 Location: " + str(dart2_location))
     #   Send the dart location to the server
     SendDartLocation(dart2_location)
@@ -382,7 +381,7 @@ def GameDart3():
         
     #   If 10 seconds have passed, then move to the NextTurn state
     NeoPixelRed()
-    dart3_location = (None,None)
+    dart3_location = ("None","None")
     print("Dart 3 Location: " + str(dart3_location))
     #   Send the dart location to the server
     SendDartLocation(dart3_location)
@@ -397,16 +396,18 @@ def SendDartLocation( dart_location ):
     global player_id
     global game_turn
     #   Send the dart location to the server
-    data = {"action": "sendDartLocation", 
-            # "game_id": game_id, 
-            # "player_id": player_id, 
-            # "game_turn": game_turn, 
+    data = {"action": "sendDart", 
+            "game_id": game_id, 
+            "player_id": player_id, 
+            "game_turn": game_turn, 
             "dart_locationx": dart_location[0],
             "dart_locationy": dart_location[1]
             }
     data_json = ujson.dumps(data)
     response = requests.post(url, data=data_json)
     response = response.text
+    #   Convert the response to json
+    response = ujson.loads(response)
     print(response)
 
 #   Function to move to the next turn
@@ -430,7 +431,7 @@ def NextTurn():
     if game == False:
         return State.NoGame
     #   Clear the board
-    return State.GameDart1
+    return State.ClearBoard
 
     
     
