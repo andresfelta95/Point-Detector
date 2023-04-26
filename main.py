@@ -464,7 +464,12 @@ def NextTurn():
     #   Ask the server if it is the next turn
     #   If it is the next turn, then move to the ClearBoard state
     #   If it is not the next turn, then move to the NoGame state
-    data = {"action": "nextTurn"}
+    data = {
+        "action": "nextTurn",
+        "game_id": game_id,
+        "player_id": player_id,
+        "game_turn": game_turn
+        }
     data_json = ujson.dumps(data)
     response = requests.post(url, data=data_json)
     response = response.text
