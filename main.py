@@ -36,14 +36,14 @@
             - S3: Pin 16 (past 19)
             - E: Pin 19 (past 23)
         The echo pin of the sensors is connected to the ESP32 as follows:
-            - Sensor 0: Pin 13 (past 32)
-            - Sensor 1: Pin 12 (past 33)
-            - Sensor 2: Pin 14 (past 25)
-            - Sensor 3: Pin 27 (past 26)
-            - Sensor 4: Pin 26 (past 27)
-            - Sensor 5: Pin 25 (past 14)
-            - Sensor 6: Pin 33 (past 12)
-            - Sensor 7: Pin 32 (past 13)
+            - Sensor 0: Pin 13 
+            - Sensor 1: Pin 12 
+            - Sensor 2: Pin 14 
+            - Sensor 3: Pin 27 
+            - Sensor 4: Pin 26 
+            - Sensor 5: Pin 25 
+            - Sensor 6: Pin 33 
+            - Sensor 7: Pin 32 
             - Sensor 8: Pin 35
             - Sensor 9: Pin 34
         The trigger pin for the multiplexer is connected to the ESP32 as follows:
@@ -177,7 +177,9 @@ NeoPixelGreen()
 #   Delay for 1 seconds
 time.sleep(1)
 #   Define the url
-url = "https://thor.cnt.sast.ca/~kevenlou/mobileToEsp/game.php"
+url = "https://thor.cnt.sast.ca/~kevenlou/mobileToEsp/esp.php"
+#   Create header with a cookie with a session id
+headers = {"Cookie": "PHPSESSID=1234567890"}
 
 ################################ Game Functions ################################
 
@@ -188,13 +190,14 @@ def NoGame():
     global player_id
     global game_turn
     global url
+    global headers
     NeoPixelBlue()
     #   Request to the server
     data = {"action": "gettingNewGame"}
     #   convert the data to json
     data_json = ujson.dumps(data)
     try:
-        response = requests.post(url, data=data_json)
+        response = requests.post(url, data=data_json, headers=headers)
         #   Get the response
         response = response.text
         #   Convert the response to json
@@ -435,34 +438,46 @@ def SendDartLocation( dart_location ):
     #   Global variables
     global game
     global url
+    global headers
     global game_id
     global player_id
     global game_turn
-    #   Send the dart location to the server
-    data = {"action": "sendDart", 
-            "game_id": game_id, 
-            "player_id": player_id, 
-            "game_turn": game_turn, 
-            "dart_locationx": dart_location[0],
-            "dart_locationy": dart_location[1]
-            }
-    data_json = ujson.dumps(data)
-    response = requests.post(url, data=data_json)
-    response = response.text
-    #   Convert the response to json
-    response = ujson.loads(response)
-    print(response)
+    try:
+        #   Send the dart location to the server
+        data = {"action": "sendDart", 
+                "game_id": game_id, 
+                "player_id": player_id, 
+                "game_turn": game_turn, 
+                "dart_locationx": dart_location[0],
+                "dart_locationy": dart_location[1]
+                }
+        data_json = ujson.dumps(data)
+        response = requests.post(url, data=data_json, headers=headers)
+        response = response.text
+        #   Convert the response to json
+        response = ujson.loads(response)
+        print(response)
+        if response["success"] == True:
+            return True
+        else:
+            return False
+    except:
+        print("Error: SendDartLocation")
+        return False
 
 #   Function to move to the next turn
 def NextTurn():
     #   Global variables
     global game
     global url
+    global headers
     global game_id
     global player_id
     global game_turn
     global player_Turn
     NeoPixelPurple()
+    #   Delay for 5 seconds
+    time.sleep(5)
     #   Ask the server if it is the next turn
     #   If it is the next turn, then move to the ClearBoard state
     #   If it is not the next turn, then move to the NoGame state
@@ -473,12 +488,12 @@ def NextTurn():
                 "game_turn": game_turn
                 }
         data_json = ujson.dumps(data)
-        response = requests.post(url, data=data_json)
+        response = requests.post(url, data=data_json, headers=headers)
         response = response.text
         #   Convert the response to json
         response = ujson.loads(response)
         print(response)
-        if response["next_turn"] == True:
+        if response["turn"] == True:
             if player_Turn == 1:
                 player_Turn = 2
                 return State.ClearBoard
@@ -492,7 +507,6 @@ def NextTurn():
             return State.NoGame
     except:
         print("Error")
-        return State.NoGame
 
     
     
