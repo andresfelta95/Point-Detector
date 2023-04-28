@@ -60,7 +60,7 @@ class UltraSensor:
                 distances.append(ultrason_duration) #   In us
             #time.sleep_us(50)
         #   Remove the outliers
-        while len(distances) >= 90:
+        while len(distances) > 50:
             #   Remove the lowest and highest values
             distances.remove(min(distances))
             distances.remove(max(distances))
@@ -68,7 +68,7 @@ class UltraSensor:
         cm = sum(distances) / len(distances)
         cm = (cm * 340 / 20000) + 1.5
         #   Return the average distance
-        return round(cm, 4)
+        return round(cm, 2)
     
     # def convert_Distance(self, distance):
     #     # actualDistance = 0.0161 * distance + 1.6172 # sensor 0
